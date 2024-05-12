@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>seattle-map</title>
+    <meta property="og:description" content="Style a polygon with the fill layer type." />
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='dist/maplibre-gl.css' />
+    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+	<script src="https://loc8.us/maplibre-gl-vector-text-protocol/dist/maplibre-gl-vector-text-protocol.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/autoComplete.min.js"></script>
+	<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.min.css"> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<!-- CRT effect from : https://aleclownes.com/2017/02/01/crt-display.html -->
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background-color:black; }
+        html, body, #map{ height: 100%; }
+
+		#selector{
+			z-index:99;
+			position:fixed;
+			bottom:0px;
+			left:45%
+		}
+		
+		#map{
+			border-left: 5px dashed #2EE683;
+		}
+		
+		#title{
+			position:absolute;
+			top:0px;
+			left:0px;
+			padding-top:5px;
+			margin-bottom:5px;
+			z-index:2;
+			width:100%;
+			color:#2EE683;
+			font-family : Courier New;
+			background-color:black;
+		}
+		
+		.choices{
+			background-color:#2EE683;
+			color:black;
+			font-family : Courier New;
+			border-width: 0px;
+		}
+		
+		#search{
+			display:inline-block;
+			white-space: nowrap
+		}
+		
+		#autoComplete{
+			background-color:#2EE683;
+			white-space: nowrap
+			color:black;
+			font-family : Courier New;
+			border-width: 0px;
+			width:106px
+		}
+		
+		#autoComplete::placeholder {
+		  font-weight: bold;
+		  color: black;
+		}
+		
+		.select-items div,.select-selected{
+			border-radius: 0px;
+			border: 1px solid transparent;
+		}
+		
+		.autoComplete_wrapper{display:inline-block;width:80vw;background-color:black;white-space: nowrap}
+		
+		.autoComplete_wrapper::-webkit-scrollbar {
+		  display: none;
+		}
+		
+		.autoComplete_wrapper>input::placeholder{transition:all .3s ease;-webkit-transition:all -webkit-transform .3s ease}
+		
+		.autoComplete_wrapper>input:hover::placeholder{transition:all .3s ease;-webkit-transition:all -webkit-transform .3s ease}
+		
+		.autoComplete_wrapper>input:focus::placeholder{padding:.1rem .6rem;font-size:.95rem}
+		
+		.autoComplete_wrapper>input:focus::selection{background-color:rgba(255,122,122,.15)}
+		
+		.autoComplete_wrapper>input::selection{background-color:rgba(255,122,122,.15)}
+		
+		.autoComplete_wrapper>input:hover{transition:all .3s ease;-webkit-transition:all -webkit-transform .3s ease}
+		
+		.autoComplete_wrapper>input:focus{border:.06rem solid rgba(255,122,122,.8)}
+		
+		.autoComplete_wrapper>ul{color:#2EE683;position:absolute;max-height:226px;overflow-y:scroll;box-sizing:border-box;left:0;right:0;margin:.5rem 0 0 0;padding:0;z-index:1;list-style:none;border:1px solid rgba(33,33,33,.07);outline:0;transition:opacity .15s ease-in-out;-moz-transition:opacity .15s ease-in-out;-webkit-transition:opacity .15s ease-in-out;background-color:black}
+		
+		.autoComplete_wrapper>ul:empty,.autoComplete_wrapper>ul[hidden]{display:block;opacity:0;transform:scale(0)}
+		
+		.autoComplete_wrapper>ul>li{color:#2EE683;margin:.3rem;padding:.3rem .5rem;text-align:left;font-size:1rem;white-space:nowrap;overflow:hidden;transition:all .2s ease}
+		
+		.autoComplete_wrapper>ul>li mark{background-color:transparent;color:#2EE683;font-weight:700}
+		.autoComplete_wrapper>ul>li:hover{cursor:pointer;background-color:rgba(255,122,122,.15)}
+		.autoComplete_wrapper>ul>li[aria-selected=true]{background-color:rgba(255,122,122,.15)}
+		
+		   .maplibregl-ctrl-group {
+			background: #13b10e00;
+			border: 1px solid #2EE683;
+			border-radius: 0px; 
+		}
+		
+		.maplibregl-ctrl-group button+button {
+			border-top: 1px solid #2EE683;
+		}
+		
+		.maplibregl-ctrl-scale {
+			background-color: hsla(0, 0%, 100%, 0); 
+			border: 2px solid #2EE683;
+			border-top: #333;
+			box-sizing: border-box;
+			color: #2EE683;
+			font-size: 10px;
+			padding: 0 5px;
+		}
+		
+.crt::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.05);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  
+}
+.crt::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.03));
+  z-index: 2;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+.crt {
+  animation: textShadow 1.6s infinite;
+}
+		
+		
+		
+		.maplibregl-popup-content {
+			background: #000;
+			border-radius: 0px;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+			padding: 15px 10px;
+			pointer-events: auto;
+			position: relative;
+			color:#2EE683;
+			font-size: 1.2em;
+			border: 1px solid #2EE683
+		}
+		
+		.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+			align-self: center;
+			border-bottom: none;
+			border-top-color: #2EE683;
+		}
+		
+		
+		
+    </style>
+</head>
+<body class="crt">
+<div id="title" class="crt" >
+    <!-- ~¥ seattle-map -version <b> -->
+	<!-- <select class="choices" name="year" id="year-select"> -->
+	  <!-- <option value="sr1">SR 1 - 2050</option> -->
+	  <!-- <option value="sr2">SR 2 - 2052</option> -->
+	  <!-- <option value="sr3">SR 3 - 2060</option> -->
+	  <!-- <option value="sr4">SR 4 - 2074</option> -->
+	  <!-- <option value="sr5">SR 5 - 2084</option> -->
+	<!-- </select></b> -->
+	<!-- <br> -->
+	<div id="search" >~¥ search-place -name &nbsp;&nbsp;<input  id="autoComplete" type="text" placeholder="_" name="name" autocomplete="off"/></div>
+</div>
+
+<div id="map"></div>
+
+
+<script>
+	
+	var baseStyle = {
+	  "version": 8,
+	  "name": "Empty Style",
+	  "metadata": {"maputnik:renderer": "mbgljs"},
+	  "sources":{},
+	  "sprite": "http://127.0.0.1:8080/sprite/sprite",
+      "glyphs": "http://127.0.0.1:8080/fonts/{fontstack}/{range}.pbf",
+	  "layers": [
+			{
+			  "id": "background",
+			  "type": "background",
+			  "paint": {"background-color": "black"}
+			}
+		]
+	}
+	
+	const bounds = [
+        [-124.0609884955572,46.37683070138684], // Southwest coordinates
+        [-120.21405917175262,48.21536166485092] // Northeast coordinates
+    ];
+	
+    var map = new maplibregl.Map({
+        container: 'map', // container id
+        style: baseStyle,
+        center: [-122.34100753697334, 47.48568898433441], // starting position [lng, lat]
+        zoom: 8, // starting zoom
+		pitch: 20,
+		maxBounds: bounds // Sets bounds as max
+    });
+	
+	//SCALEBAR
+	let scale = new maplibregl.ScaleControl({
+		maxWidth: 80,
+		unit: 'metric'
+	});
+	map.addControl(scale);
+	
+	//COMPASS
+	let nav = new maplibregl.NavigationControl();
+	map.addControl(nav, 'bottom-right');
+	
+	map.on('zoom', function() {
+	  // Log the current zoom level to the console
+	  console.log(map.getZoom());
+	});
+
+	// Add the sources for all the types
+	VectorTextProtocol.addProtocols(maplibregl);
+	
+	
+	
+    map.on('load', () => {
+
+		//LAND
+        map.addSource('land', {
+            'type': 'geojson',
+            'data': 'land2.geojson'
+        });
+        map.addLayer({
+            'id': 'land',
+            'type': 'fill',
+            'source': 'land',
+            'layout': {},
+            'paint': {
+                'fill-color': '#0C1E17'
+            }
+        });
+		map.addLayer({
+            'id': 'land-coastline',
+            'type': 'line',
+            'source': 'land',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "#98FFE0",
+			  "line-width": ["interpolate",["linear"],["zoom"],10,0.1,16,2],
+			  "line-opacity": ["interpolate",["linear"],["zoom"],10,0,16,1]
+			}
+        });
+		
+		//GRID POP
+        map.addSource('grid_pop', {
+            'type': 'geojson',
+            'data': 'grid_pop.geojson'
+        });
+		map.addLayer({
+            'id': 'grid_pop',
+            'type': 'fill-extrusion',
+            'source': 'grid_pop',
+            'paint': {
+                "fill-extrusion-color": ["interpolate",["linear"],["get","NUMPOINTS"],1,"#003817",500,"#98FFE0"],
+                // Get fill-extrusion-height from the source 'height' property.
+                'fill-extrusion-height': ['get', 'NUMPOINTS'],
+				//'fill-extrusion-base': ['get', 'base_h'],
+                // Make extrusions slightly opaque for see through indoor walls.
+                'fill-extrusion-opacity': ["interpolate",["linear"],["zoom"],7,0.8,11,0]
+            }
+        });
+		
+		//NEIGHBORHOODS
+		map.addSource('neighborhoods', {
+            'type': 'geojson',
+            'data': 'neighborhoods.geojson'
+        });
+		map.addLayer({
+            'id': 'neighborhoods',
+            'type': 'line',
+            'source': 'neighborhoods',
+            'layout': {},
+            'paint': {
+                'line-color': ["get","color"],
+				"line-opacity": ["interpolate",["linear"],["zoom"],10,0,16,1],
+				"line-width": ["interpolate",["linear"],["zoom"],10,0.1,16,3],
+				//"line-dasharray":[1,1]
+            },
+			
+        });
+		
+		//LAVA
+		map.loadImage(
+            'lava_pattern.png',
+            function (err, image) {
+                // Throw an error if something went wrong
+                if (err) throw err;
+
+                // Declare the image
+                map.addImage('lava_pattern', image);
+				
+				map.addSource('lava', {
+					'type': 'geojson',
+					'data': 'lava.geojson'
+				});
+                map.addLayer({
+					'id': 'lava',
+					'type': 'fill',
+					'source': 'lava',
+					'layout': {
+					},
+					'paint': {
+						//'fill-color': "white",
+						"fill-opacity": ["interpolate",["linear"],["zoom"],8,0,16,0.45],
+						'fill-pattern': 'lava_pattern'
+					},
+				});
+            }
+        );
+		
+		
+		
+		
+		//ROADS
+		map.addSource('roads', {
+            'type': 'geojson',
+            'data': 'roads.geojson'
+        });
+		map.addLayer({
+            'id': 'roads',
+            'type': 'line',
+            'source': 'roads',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "grey",
+			  "line-opacity": ["interpolate",["linear"],["zoom"],10,0,16,1]
+			
+			},
+			'filter':["match",["get","tunnel"],["F"],true,false]
+        });
+		map.addLayer({
+            'id': 'main-roads',
+            'type': 'line',
+            'source': 'roads',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "#BAD8D7",
+			  "line-opacity": ["interpolate",["linear"],["zoom"],9,0,16,0.7],
+			  "line-width": ["interpolate",["linear"],["zoom"],10,1,16,2]
+			
+			},
+			'filter':["match",["get","fclass"],["motorway","motorway_link","trunk_link"],true,false]
+        });
+		//TUNNELS
+		map.addLayer({
+            'id': 'tunnels',
+            'type': 'line',
+            'source': 'roads',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "white",
+			  "line-opacity": ["interpolate",["linear"],["zoom"],10,0,16,1],
+			    "line-dasharray":[1,1]
+			},
+			'filter':["match",["get","tunnel"],["T"],true,false]
+        });
+		
+		//TRAIN
+		map.addSource('maglev', {
+            'type': 'geojson',
+            'data': 'maglev.geojson'
+        });
+		map.addLayer({
+            'id': 'maglev',
+            'type': 'line',
+            'source': 'maglev',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "orange",
+			  "line-opacity": ["interpolate",["linear"],["zoom"],9,0,16,0.7],
+			  "line-width": ["interpolate",["linear"],["zoom"],10,1,16,2]
+			
+			},
+        });
+		
+		//AEROWAY_LINES
+		map.addSource('aeroway_lines', {
+            'type': 'geojson',
+            'data': 'aeroway_lines.geojson'
+        });
+		map.addLayer({
+            'id': 'aeroway_lines',
+            'type': 'line',
+            'source': 'aeroway_lines',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "black",
+			  'line-width':1.5,
+			  "line-opacity": ["interpolate",["linear"],["zoom"],10,0,16,1]
+			}
+        });
+		
+		//GLOW_CITY
+		map.addSource('glow_city', {
+            'type': 'geojson',
+            'data': 'glow_city_heatmap.geojson'
+        });
+		map.addLayer({
+            'id': 'glow_city',
+            'type': 'heatmap',
+            'source': 'glow_city',
+            'layout': {},
+            'paint': {
+				//'heatmap-color': ['interpolate', ['linear'],['heatmap-density'], 0, '#009D71',  0.4, '#98FFE0',  1, '#C3E024'],
+				'heatmap-radius': ['interpolate', ['linear'],['zoom'], 10, 1, 16, 20],
+				'heatmap-opacity': ['interpolate', ['linear'],['zoom'], 8, 0, 15, 0.5]
+			  }
+        });
+		
+		//HELL'S KITCHEN
+		map.addSource('hellskitchen', {
+            'type': 'geojson',
+            'data': 'hellskitchen.geojson'
+        });
+		map.addLayer({
+            'id': 'hellskitchen',
+            'type': 'heatmap',
+            'source': 'hellskitchen',
+            'layout': {},
+            'paint': {
+				'heatmap-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0,
+                        'rgba(255,255,255,0)',
+                        0.2,
+                        'rgb(255,255,255,0.2)',
+                        0.4,
+                        'rgb(255,255,255,0.5)',
+                        0.6,
+                        'rgb(255,255,255,0.8)',
+                        0.8,
+                        'rgb(255,255,255,0.8)',
+                        1,
+                        'yellow'
+                    ],
+				'heatmap-radius': ['interpolate', ['linear'],['zoom'], 10, 10, 16, 50],
+				'heatmap-opacity': ['interpolate', ['linear'],['zoom'], 8, 0, 15, 0.5]
+			  }
+        });
+		
+		
+		//SEATTLE BORDERS
+        map.addSource('seattle_borders', {
+            'type': 'geojson',
+            'data': 'seattle_borders.geojson'
+        });
+        map.addLayer({
+            'id': 'seattle_borders',
+            'type': 'line',
+            'source': 'seattle_borders',
+            'layout': {},
+            'paint': {
+                'line-color': '#98FFE0',
+				'line-width':2
+            }
+        });
+		
+		//SEATTLE DISTRICTS
+        map.addSource('districts_borders', {
+            'type': 'geojson',
+            'data': 'districts_borders.geojson'
+        });
+        map.addLayer({
+            'id': 'districts_borders',
+            'type': 'line',
+            'source': 'districts_borders',
+            'layout': {},
+            'paint': {
+                'line-color': '#98FFE0',
+				'line-width':0.8
+            }
+        });
+		
+		//MONORAIL
+        map.addSource('monorail', {
+            'type': 'geojson',
+            'data': 'monorail.geojson'
+        });
+		//MONORAIL
+		map.addLayer({
+            'id': 'monorail',
+            'type': 'line',
+            'source': 'monorail',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "white",
+			  "line-width": ["interpolate",["linear"],["zoom"],8,0.5,16,2],
+			  "line-opacity": ["interpolate",["linear"],["zoom"],8,0,14,1],
+			  "line-dasharray":[1,2]
+			}
+        });
+		
+		//FERRY
+        map.addSource('ferry', {
+            'type': 'geojson',
+            'data': 'ferry.geojson'
+        });
+		//MONORAIL
+		map.addLayer({
+            'id': 'ferry',
+            'type': 'line',
+            'source': 'ferry',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "line-color": "#98FFE0",
+			  "line-width": ["interpolate",["linear"],["zoom"],8,0.5,16,2],
+			  "line-opacity": ["interpolate",["linear"],["zoom"],8,0,14,1],
+			  "line-dasharray":[1,2]
+			}
+        });
+		
+		//AREAS OF INTEREST
+        map.addSource('aois', {
+            'type': 'geojson',
+            'data': 'areas_of_interest.geojson'
+        });
+		//GREEN AOIS
+		map.addLayer({
+            'id': 'aois-green',
+            'type': 'fill',
+            'source': 'aois',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "fill-color": "#00BE67",
+			  //"fill-width": ["interpolate",["linear"],["zoom"],8,0.5,16,2],
+			  "fill-opacity": ["interpolate",["linear"],["zoom"],8,0,14,0.1]
+			},
+			'filter':["match",["get","type"],["attraction","farm","farmland","golf","park","zoo"],true,false]
+        });
+		//RED AOIS
+		map.addLayer({
+            'id': 'aois-red',
+            'type': 'fill',
+            'source': 'aois',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "fill-color": "red",
+			  //"line-width": ["interpolate",["linear"],["zoom"],8,0.5,16,2],
+			  "fill-opacity": ["interpolate",["linear"],["zoom"],8,0,14,0.1]
+			},
+			'filter':["match",["get","type"],["corpo","factory","military","police","medical","lab","gov","prison","restricted"],true,false]
+        });
+		//WHITE AOIS
+		map.addLayer({
+            'id': 'aois-white',
+            'type': 'fill',
+            'source': 'aois',
+            'layout': {
+			  
+			},
+            "paint": {
+			  "fill-color": "white",
+			  //"line-width": ["interpolate",["linear"],["zoom"],8,0.5,16,2],
+			  "fill-opacity": ["interpolate",["linear"],["zoom"],9,0,14,0.1]
+			},
+			'filter':["match",["get","type"],["arco","mall","transport","university"],true,false]
+        });
+		
+		//MASK
+        map.addSource('mask', {
+            'type': 'geojson',
+            'data': 'mask.geojson'
+        });
+		map.addLayer({
+            'id': 'mask',
+            'type': 'fill',
+            'source': 'mask',
+            'layout': {},
+            'paint': {
+                'fill-color': '#000',
+				'fill-opacity':0.5
+            }
+        });
+		
+		
+		
+		//PLACES LABELS
+        map.addSource('places_labels', {
+            'type': 'geojson',
+            'data': 'places_labels.geojson'
+        });
+		//DISTRICTS LABELS
+        map.addLayer({
+            'id': 'districts_labels',
+            'type': 'symbol',
+            'source': 'places_labels',
+            'layout': {
+				"text-size": 14,
+				"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Glitch Goblin Regular"
+				],
+			},
+            "paint": {
+			  "text-halo-width": 2,
+			  "text-halo-color": "black",
+			  "text-color": "#98FFE0",
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","type"],["district"],true,false]
+        });
+		
+		//SSC LABELS
+        map.addLayer({
+            'id': 'ssc_labels',
+            'type': 'symbol',
+            'source': 'places_labels',
+            'layout': {
+				"text-size": 15,
+				"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				//"text-max-width": 6,
+				"text-font": [
+					"Brassia Regular"
+				],
+			},
+            "paint": {
+			  "text-halo-width": 2,
+			  "text-halo-color": "black",
+			  "text-color": "grey",
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","type"],["ssc"],true,false]
+        });
+		
+		//NEIGHBORHOODS LABELS
+        map.addSource('neighborhoods_labels', {
+            'type': 'geojson',
+            'data': 'neighborhoods_labels.geojson'
+        });
+		//NEIGHBORHOODS LABELS CLASSIC
+        map.addLayer({
+            'id': 'neighborhoods_labels',
+            'type': 'symbol',
+            'source': 'neighborhoods_labels',
+			'minzoom':12,
+            'layout': {
+				"text-size": 14,
+				"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Magda Clean Mono Offc Pro Regular",
+					"Arial Unicode MS Regular"
+				],
+			},
+            "paint": {
+			 // "text-halo-width": 2,
+			 // "text-halo-color": "#2b2b2b",
+			  "text-color": ["get","color"],
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","name"],["Japanese District 日本人街","Chinese District 唐人街","Safe Docks"],true,false]
+        });
+		//ELVEN DISTRICT
+        map.addLayer({
+            'id': 'elven_neighborhoods_labels',
+            'type': 'symbol',
+            'source': 'neighborhoods_labels',
+			'minzoom':12,
+            'layout': {
+				"text-size": 15,
+				"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Half-Elven Regular"
+				],
+			},
+            "paint": {
+			 // "text-halo-width": 2,
+			 // "text-halo-color": "#2b2b2b",
+			  "text-color": ["get","color"],
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","name"],["Elven District"],true,false]
+        });
+		//ORK DISTRICT
+        map.addLayer({
+            'id': 'ork_neighborhoods_labels',
+            'type': 'symbol',
+            'source': 'neighborhoods_labels',
+			'minzoom':12,
+            'layout': {
+				"text-size": 15,
+				"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Orc Horde BB Regular"
+				],
+			},
+            "paint": {
+			 // "text-halo-width": 2,
+			 // "text-halo-color": "#2b2b2b",
+			  "text-color": ["get","color"],
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","name"],["Ork Underground"],true,false]
+        });
+		
+		//OTHER PLACE LABELS
+        map.addLayer({
+            'id': 'other_places_labels',
+            'type': 'symbol',
+            'source': 'places_labels',
+			'minzoom': 9.7,
+            'layout': {
+				"text-size": 12,
+				//"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Lentariso Regular"
+				],
+			},
+            "paint": {
+			  "text-color": "#98FFE0",
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","type"],["place"],true,false]
+        });
+		
+		//MAIN WATER LABELS
+        map.addLayer({
+            'id': 'main_water_labels',
+            'type': 'symbol',
+            'source': 'places_labels',
+			'minzoom': 9,
+            'layout': {
+				"text-size": 12,
+				//"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Terminal Grotesque Regular"
+				],
+			},
+            "paint": {
+			  //"text-halo-width": 2,
+			  //"text-halo-color": "#2b2b2b",
+			  "text-color": "white",
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","type"],["main_water","island"],true,false]
+        });
+		
+		//MOUNTAINS
+		map.addLayer({
+            'id': 'mountains',
+            'type': 'symbol',
+            'source': 'places_labels',
+			'minzoom': 9,
+			'icon-allow-overlap': true,
+            "layout": {
+				"text-size": 12,
+				"text-anchor":'bottom',
+				"icon-image": 'mountain',
+				"icon-size": 0.7,
+                "text-font": [
+					"Magda Clean Mono Offc Pro Regular",
+					"Arial Unicode MS Regular"
+				],
+            "text-offset": [0,-0.35],
+            "text-field": ["get","name"],
+            "text-letter-spacing": 0.1,
+            "text-max-width": 6
+            },
+            "paint": {
+			  "text-color": "white",
+			  "text-translate-anchor": "viewport",
+			  //"text-halo-color": "#2b2b2b",
+			  //"text-halo-width": 2
+            },
+			'filter':["match",["get","type"],["mountain"],true,false]
+        });
+		
+		//WATER LABELS
+        map.addLayer({
+            'id': 'water_labels',
+            'type': 'symbol',
+            'source': 'places_labels',
+			'minzoom': 10.5,
+            'layout': {
+				"text-size": 10,
+				//"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Skate blade Regular"
+				],
+			},
+            "paint": {
+			  //"text-halo-width": 2,
+			  //"text-halo-color": "#2b2b2b",
+			  "text-color": "grey",
+			  //"text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","type"],["lake","water"],true,false]
+        });
+		
+		//PIER LABELS
+        map.addLayer({
+            'id': 'pier_labels',
+            'type': 'symbol',
+            'source': 'places_labels',
+			'minzoom': 14,
+            'layout': {
+				"text-size": 12,
+				//"text-transform": "uppercase",
+				"text-anchor": "bottom",
+				"text-field": ["to-string",["get","name"]],
+				"text-letter-spacing": 0.1,
+				"text-max-width": 6,
+				"text-font": [
+					"Magda Clean Mono Offc Pro Regular",
+					"Arial Unicode MS Regular"
+				],
+			},
+            "paint": {
+			  //"text-halo-width": 2,
+			  //"text-halo-color": "#2b2b2b",
+			  "text-color": "white",
+			  "text-translate-anchor": "viewport"
+			},
+			'filter':["match",["get","type"],["pier"],true,false]
+        });
+		
+		
+		
+		//RENRAKU ARCO
+        map.addSource('renraku_arco', {
+            'type': 'geojson',
+            'data': 'renraku_arco.geojson'
+        });
+		map.addLayer({
+            'id': 'renraku_arco',
+            'type': 'fill-extrusion',
+            'source': 'renraku_arco',
+            'paint': {
+                "fill-extrusion-color": ["interpolate",["linear"],["get","level"],1,"#003817",320,"#98FFE0"],
+                // Get fill-extrusion-height from the source 'height' property.
+                'fill-extrusion-height': ['get', 'level'],
+                // Make extrusions slightly opaque for see through indoor walls.
+                'fill-extrusion-opacity': 0.5
+            }
+        });
+		
+		//AZ ARCO
+        map.addSource('az_arco', {
+            'type': 'geojson',
+            'data': 'az_arco.geojson'
+        });
+		map.addLayer({
+            'id': 'az_arco',
+            'type': 'fill-extrusion',
+            'source': 'az_arco',
+            'paint': {
+                "fill-extrusion-color": ["interpolate",["linear"],["get","height"],1,"#003817",211,"#98FFE0"],
+                // Get fill-extrusion-height from the source 'height' property.
+                'fill-extrusion-height': ['get', 'height'],
+                // Make extrusions slightly opaque for see through indoor walls.
+                'fill-extrusion-opacity': 0.5
+            }
+        });
+		
+		//MCT
+        map.addSource('mct', {
+            'type': 'geojson',
+            'data': 'mct.geojson'
+        });
+		map.addLayer({
+            'id': 'mct',
+            'type': 'fill-extrusion',
+            'source': 'mct',
+            'paint': {
+                "fill-extrusion-color": ["interpolate",["linear"],["get","height"],1,"#003817",300,"#98FFE0"],
+                // Get fill-extrusion-height from the source 'height' property.
+                'fill-extrusion-height': ['get', 'height'],
+                // Make extrusions slightly opaque for see through indoor walls.
+                'fill-extrusion-opacity': 0.5
+            }
+        });
+		
+		//SPACE_NEEDLE
+        map.addSource('space_needle', {
+            'type': 'geojson',
+            'data': 'space_needle.geojson'
+        });
+		map.addLayer({
+            'id': 'space_needle',
+            'type': 'fill-extrusion',
+            'source': 'space_needle',
+            'paint': {
+                "fill-extrusion-color": ["interpolate",["linear"],["get","tot_h"],1,"#003817",170,"#98FFE0"],
+                // Get fill-extrusion-height from the source 'height' property.
+                'fill-extrusion-height': ['get', 'tot_h'],
+				'fill-extrusion-base': ['get', 'base_h'],
+                // Make extrusions slightly opaque for see through indoor walls.
+                'fill-extrusion-opacity': 0.5
+            }
+        });
+		
+		
+		
+		
+		
+		
+		//POINTS OF INTEREST
+        map.addSource('pois', {
+            'type': 'geojson',
+            'data': 'points_of_interest.geojson'
+        });
+		//POINTS OF INTEREST
+		map.addLayer({
+            'id': 'points_of_interest',
+            'type': 'symbol',
+            'source': 'pois',
+			'minzoom': 12,
+			'icon-allow-overlap': true,
+            "layout": {
+				"text-size": 12,
+				"text-anchor":'bottom',
+				"icon-image": ["get","type"],
+				"icon-size": ["interpolate",["linear"],["zoom"],12,0.7,16,1],
+                "text-font": [
+					"Brutalita  400"
+				],
+            "text-offset": [0,-0.5],
+            "text-field": ["get","name"],
+            "text-letter-spacing": 0.1,
+            "text-max-width": 6
+            },
+            "paint": {
+			  "text-color": "white",
+			  "text-translate-anchor": "viewport",
+			  "text-halo-color": "#2b2b2b",
+			  "text-halo-width": 2
+            },
+			'filter':["match",["get","sr1"],["no"],false,true]			
+        });
+		
+		
+		//POINTS OF INTEREST ICONS ONLY
+		map.addLayer({
+            'id': 'points_of_interest_icons',
+            'type': 'symbol',
+            'source': 'pois',
+			'minzoom': 11,
+            "layout": {
+				"icon-image": ["get","type"],
+				"icon-size": ["interpolate",["linear"],["zoom"],11,0.6,12,0.7,16,1],
+				'icon-allow-overlap': true,
+			    'icon-ignore-placement': true,
+            },
+            "paint": {
+				"icon-opacity": ["interpolate",["linear"],["zoom"],11,0,12,1],
+			},
+			'filter':["match",["get","sr1"],["no"],false,true]				
+        });
+		
+	//SEARCH FUNCTION
+	
+	$.getJSON( "points_of_interest.geojson", function( data ) {
+	
+		//console.log(data)
+		var db = []
+		
+		for (var i in data.features){
+			db.push(data.features[i].properties.name)
+		}
+		//console.log(db)
+		const autoCompleteJS = new autoComplete({
+		placeHolder: "_",
+		data: {
+			src: db
+		},
+		resultItem: {
+			highlight: true,
+		},
+		events: {
+                input: {
+                    selection: (event) => {
+                        const selection = event.detail.selection.value;
+						for (var i in data.features){
+							if (selection == data.features[i].properties.name){
+								map.flyTo({
+								// These options control the ending camera position: centered at
+								// the target, at zoom level 9, and north up.
+								center: data.features[i].geometry.coordinates,
+								zoom: 16,
+								// this animation is considered essential with respect to prefers-reduced-motion
+								essential: true
+							});
+							}
+						
+						}
+                        
+                    }
+                }
+            }
+		});	
+	
+	}) // end search function
+	
+	// POPUPS
+        map.on('click', 'points_of_interest_icons', (e) => {
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const description = '<b>'+e.features[0].properties.name+'</b></br><em>'+e.features[0].properties.address+'</em></br></br>'+e.features[0].properties.desc
+
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse is over 
+        map.on('mouseenter', 'points_of_interest_icons', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+        map.on('mouseleave', 'points_of_interest_icons', () => {
+            map.getCanvas().style.cursor = '';
+        });
+	
+	
+	
+		
+		
+	})
+		
+	
+</script>
+</body>
+</html>
