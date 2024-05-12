@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "neighborhoods_labels",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "Elven District", "type": "neighborhood", "sr1": null, "sr2": null, "sr3": null, "sr4": null, "sr5": "yes", "color": "#C3E024" }, "geometry": { "type": "Point", "coordinates": [ -122.338069975572949, 47.623425568660451 ] } },
+{ "type": "Feature", "properties": { "name": "Japanese District 日本人街", "type": "neighborhood", "sr1": null, "sr2": null, "sr3": null, "sr4": null, "sr5": "yes", "color": "#DA2F2C" }, "geometry": { "type": "Point", "coordinates": [ -122.324991578712215, 47.598302494401771 ] } },
+{ "type": "Feature", "properties": { "name": "Chinese District 唐人街", "type": "neighborhood", "sr1": null, "sr2": null, "sr3": null, "sr4": null, "sr5": "yes", "color": "#F9E418" }, "geometry": { "type": "Point", "coordinates": [ -122.327555152917583, 47.602954264644573 ] } },
+{ "type": "Feature", "properties": { "name": "Safe Docks", "type": "neighborhood", "sr1": null, "sr2": null, "sr3": null, "sr4": null, "sr5": "yes", "color": "#3DB5C7" }, "geometry": { "type": "Point", "coordinates": [ -122.341561021746941, 47.606017742400098 ] } },
+{ "type": "Feature", "properties": { "name": "Ork Underground", "type": "neighborhood", "sr1": null, "sr2": null, "sr3": null, "sr4": null, "sr5": null, "color": "#D49F13" }, "geometry": { "type": "Point", "coordinates": [ -122.335381348967303, 47.606284734255262 ] } }
+]
+}

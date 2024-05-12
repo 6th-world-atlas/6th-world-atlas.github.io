@@ -1,0 +1,226 @@
+{
+  "airport": {
+    "x": 0,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "arco": {
+    "x": 36,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "asso": {
+    "x": 72,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "monorail": {
+    "x": 108,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "bar": {
+    "x": 144,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "restaurant": {
+    "x": 180,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "hotel": {
+    "x": 216,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "medical": {
+    "x": 252,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "corpo": {
+    "x": 288,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "mountain": {
+    "x": 324,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "attraction": {
+    "x": 360,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "casino": {
+    "x": 396,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "education": {
+    "x": 432,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "factory": {
+    "x": 468,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "farm": {
+    "x": 504,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "mall": {
+    "x": 540,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "shop": {
+    "x": 576,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "gov": {
+    "x": 612,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "power_plant": {
+    "x": 648,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "ferry": {
+    "x": 684,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "gym": {
+    "x": 720,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "military": {
+    "x": 756,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "nightclub": {
+    "x": 792,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "park": {
+    "x": 828,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "police": {
+    "x": 864,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "prison": {
+    "x": 900,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "spa": {
+    "x": 936,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  },
+  "train": {
+    "x": 972,
+    "y": 0,
+    "width": 36,
+    "height": 36,
+    "pixelRatio": 2,
+    "visible": true
+  }
+}
